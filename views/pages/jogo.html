@@ -1,54 +1,391 @@
-<!DOCTYPE html>
-<html>
-<body onKeyDown="pegadirecao(event.keyCode);">
+<html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-<h2 align="center">Michael Moraes</h2>
+  <title>Snake-Game-Michael</title>
 
-<div id=principal></div>
-<script>
-    tabuleiro="<table align=center border=1>";
-    for(x=0;x<10;x++){
-        tabuleiro+="<tr>";
-        for(y=0;y<10;y++)
-            tabuleiro+="<td id=td"+x+"_"+y+" style='width:30px; height:30px;'> </td>";
-        tabuleiro+="</tr>";
+  </head>
+
+<style>
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: 0;
+  }
+  
+html, body, #root {
+    height: 100vh;
+    width: 100vw;
+  }
+  
+body {
+    background-color: #0c3b52;
+  }
+  
+h1 {
+    color: hsl(202, 71%, 41%);
+    text-transform: uppercase;
+    text-shadow: #1d5677;
+    padding-top: 210px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    
+  }
+  
+#root{
+    text-align: center;
+  }
+  
+.buttons {
+    display: none;
+  }
+  
+  @media only screen and (max-width: 1000px) {
+canvas {
+      height: 350px;
+      width: 350px;
+      margin-top: 5px;
     }
-    document.getElementById('principal').innerHTML=tabuleiro+"</table>";
-    cobra=[[5,0]];
-    direcao=2;
-    mx=parseInt(Math.random()*10);
-    my=parseInt(Math.random()*10);
-    vivo=true;
-    function anda(){
-        document.getElementById('td'+cobra[cobra.length-1][0]+'_'+cobra[cobra.length-1][1]).style.background="#ffffff";
-        if(mx==cobra[cobra.length-1][0]&&my==cobra[cobra.length-1][1]){
-            mx=parseInt(Math.random()*10);
-            my=parseInt(Math.random()*10);
-            cobra[cobra.length]=[10,10];
-        }
-        for(x=cobra.length-1;x>0;x--){
-            cobra[x][0]=cobra[x-1][0];
-            cobra[x][1]=cobra[x-1][1];
-        }
-        if(direcao==0)cobra[0][1]--;
-        if(direcao==1)cobra[0][0]--;
-        if(direcao==2)cobra[0][1]++;
-        if(direcao==3)cobra[0][0]++;
-        for(x=1;x<cobra.length;x++)if(cobra[0][0]==cobra[x][0]&&cobra[0][1]==cobra[x][1])vivo=false;
-        if(cobra[0][0]<0||cobra[0][1]<0||cobra[0][0]>9||cobra[0][1]>9)vivo=false;
-        document.getElementById('td'+cobra[0][0]+'_'+cobra[0][1]).style.background="#333333";
-        document.getElementById('td'+mx+'_'+my).style.background="#ff3333";
-        if(vivo)setTimeout('anda()',300);
-        else alert('Fim de jogo');
+
+.buttons{
+      display: block;
+      margin-top: 20px;
+      width: 100vw;
     }
-    anda();
-    function pegadirecao(tecla){
-        /*alert(tecla);*/
-        if(tecla==37)direcao=0;
-        if(tecla==38)direcao=1;
-        if(tecla==39)direcao=2;
-        if(tecla==40)direcao=3;
+  
+button{
+      width: 80px;
+      height: 50px;
+      border-radius: 5px;
+      border: none;
+      color: #ecf0f1;
+      background-color: #225e81;
     }
+  
+.div-side {
+      margin: 2px auto;
+      width: 250px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+#restart {
+      display: none;
+    }
+  }
+
+  </style>
+
+<body onKeyDown="pegadirecao(event.keyCode);"><div data-v-7e2550d6="" class="odm_extension image_downloader_wrapper"><!----></div>
+  <div id="root">
+    <h1>Snaker Player - Michael M.</h1>
+  <canvas width="0" height="0"></canvas>
+
+  <script>
+
+    
+class criarCobra {
+  constructor(gameContext, gameDiv, gameBack){
+    this.gameContext = gameContext;
+    this.gameDiv = gameDiv;
+    this.gameBack = gameBack;
+    this.snakeX = 2;
+    this.snakeY = this.snakeX;
+    this.vel = 1;
+    this.velX = this.vel;
+    this.velY = 0;
+    this.permision = false;
+    this.snakeTrail = [{"x": this.snakeX, "y": this.snakeY}];
+  }
+
+  adicionarTrail(){;
+
+    let i = this.snakeTrail.length - 1;
+
+    for(i; i >= 0; i--){
+      if (i != 0){
+        this.snakeTrail[i] = this.snakeTrail[i - 1];
+      }else{
+        this.snakeTrail[0] = {"x": this.snakeX, "y": this.snakeY};
+      }
+    }
+
+  }
+
+  limparCobra(){
+    while(this.snakeTrail.length > 1){
+      this.snakeTrail.pop();
+    }
+  }
+
+  perder(){
+
+    for(let i = 0; i < this.snakeTrail.length; i++){
+        
+      if(i != 0 && this.snakeTrail[0].x == this.snakeTrail[i].x &&
+        this.snakeTrail[0].y == this.snakeTrail[i].y){
+
+          this.velX = this.velY = 0;
+
+          this.gameBack.lose = true;
+          this.gameBack.oldScore = this.gameBack.score; 
+          this.gameBack.score = 0;
+          this.limparCobra(); 
+
+          document.getElementById('restart').style.display = 'block';        
+
+          console.log("Você Perdeu!");
+
+          return true;
+      }else{
+        //nada
+      }        
+    }
+    return false;
+  }
+
+  desenhar(){
+    this.moveSnake();
+    this.adicionarTrail(); 
+    this.perder();  
+
+    for(let i = 0; i < this.snakeTrail.length; i++){
+      if(i == 0){
+        this.gameContext.fillStyle ='#EEF';
+      }else{
+        this.gameContext.fillStyle ='#FFF7';
+      }
+      this.gameContext.fillRect(this.snakeTrail[i].x * this.gameDiv, 
+        this.snakeTrail[i].y * this.gameDiv, this.gameDiv - 2, this.gameDiv - 2);
+    }
+  }
+
+  setVel(theKeyCode){
+
+    let setXY = (x, y) => {
+      this.velX = x;
+      this.velY = y;
+    }
+    if(!this.gameBack.lose){
+
+      if((theKeyCode == 37 || theKeyCode == 65) && this.permision){//left
+        setXY(-this.vel, 0);
+        this.permision = !this.permision;
+      }else if((theKeyCode == 38 || theKeyCode == 87) && !this.permision){//up
+        setXY(0, -this.vel);
+        this.permision = !this.permision;
+      }else if((theKeyCode == 39 || theKeyCode == 68) && this.permision){//right
+        setXY(this.vel, 0);
+        this.permision = !this.permision;
+      }else if((theKeyCode == 40 || theKeyCode == 83) && !this.permision){//down
+        setXY(0, this.vel);
+        this.permision = !this.permision;
+      }else{
+        //none
+      }
+
+    }else if(theKeyCode == 32){
+      this.gameBack.lose = false;
+      this.velX = this.vel;
+      this.permision = false;
+      document.getElementById('restart').style.display = 'none';
+    }    
+
+  }
+
+  moveSnake(){
+    this.snakeX += this.velX;
+    this.snakeY += this.velY;
+
+    if(this.snakeX > 19){
+      this.snakeX = 0;
+    }else if(this.snakeX < 0){
+      this.snakeX = 19;
+    }
+
+    if(this.snakeY > 19){
+      this.snakeY = 0;
+    }else if(this.snakeY < 0){
+      this.snakeY = 19;
+    }
+  }
+
+}
+
+class criarMaça {
+  constructor(snake, gameContext, gameDiv, gameBack){
+    this.snake = snake;
+    this.gameContext = gameContext;
+    this.gameDiv = gameDiv;
+    this.gameBack = gameBack;
+    this.appleX = 15;
+    this.appleY = 15;
+  }
+
+  pegarMaça(){
+    if(this.appleX == this.snake.snakeTrail[0].x &&
+      this.appleY == this.snake.snakeTrail[0].y){
+
+        this.snake.snakeTrail.push({"x": '', "y": ''});
+
+        this.gameBack.score += 10;
+
+        this.appleX = Math.floor(Math.random() * 20);
+        this.appleY = Math.floor(Math.random() * 20);
+    }else{
+     
+    }
+  }
+
+  empate(){
+    this.pegarMaça();
+    this.gameContext.fillStyle = '#970820';
+    this.gameContext.beginPath();
+    this.gameContext.arc((this.appleX * this.gameDiv) + (this.gameDiv/2),
+      (this.appleY * this.gameDiv) + (this.gameDiv/2), this.gameDiv/2.5, 0, 2 * Math.PI);
+    this.gameContext.fill();
+  }
+}
+
+class jogarDenovo {
+  constructor(gameContext, gameWindow){
+    this.gameContext = gameContext;
+    this.gameWindow = gameWindow;
+    this.score = 0;
+    this.lose = false;
+    this.oldScore = 0;
+  }
+
+  empate(){
+    this.gameContext.fillStyle = '#0099AA ';
+    this.gameContext.fillRect(0, 0, this.gameWindow.width, this.gameWindow.height);
+
+    this.gameContext.fillStyle = '#fff';
+    this.gameContext.font = "14px Arial";
+    this.gameContext.fillText(this.score, 30, 20);
+
+    if(this.lose){
+      this.gameContext.fillStyle = '#fff';
+      this.gameContext.font = "30px Arial";
+      this.gameContext.fillText("Fim de Jogo!", 120, 150);
+
+      this.gameContext.fillStyle = '#fff';
+      this.gameContext.font = "20px Arial";
+      this.gameContext.fillText(`Sua pontuação: ${this.oldScore}`, 130, 180);
+
+      this.gameContext.fillStyle = '#fff';
+      this.gameContext.font = "15px Arial";
+      this.gameContext.fillText('Jogar novamente? Aperte espaço!', 100, 250);
+    }
+  }
+}
+
+function criarCanvas(app, width, height){
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  app.appendChild(canvas);
+  return canvas;
+}
+
+function criarBotao(app){
+        const div = document.createElement('div');
+          div.setAttribute('class', 'buttons');
+  app.appendChild(div);
+
+  const up = document.createElement('button');
+  up.setAttribute('type', 'button');
+  up.setAttribute('id', 'up');
+  up.textContent = 'UP';
+  div.appendChild(up);
+
+  const divSide = document.createElement('div');
+  divSide.setAttribute('class', 'div-side');
+  div.appendChild(divSide);
+
+  const left = document.createElement('button');
+  left.setAttribute('type', 'button');
+  left.setAttribute('id', 'left');
+  left.textContent = '< LEFT';
+  divSide.appendChild(left);
+
+  const restart = document.createElement('button');
+  restart.setAttribute('type', 'button');
+  restart.setAttribute('id', 'restart');
+  restart.textContent = 'RESTART';
+  divSide.appendChild(restart);
+
+  const right = document.createElement('button');
+  right.setAttribute('type', 'button');
+  right.setAttribute('id', 'right');
+  right.textContent = 'RIGHT >';
+  divSide.appendChild(right);
+  
+  const down = document.createElement('button');
+  down.setAttribute('type', 'button');
+  down.setAttribute('id', 'down');
+  down.textContent = 'DOWN';
+  div.appendChild(down);
+
+
+  return div;
+}
+
+window.onload = () => {
+
+  const app = document.getElementById('root');
+  const gameWindow = criarCanvas(app, 500, 500);
+  const gameContext = gameWindow.getContext('2d');
+  const gameDiv = 25;
+
+  const voltarJogo = new jogarDenovo(gameContext, gameWindow);
+  const cobra = new criarCobra (gameContext, gameDiv, voltarJogo);
+  const maça = new criarMaça(cobra, gameContext, gameDiv, voltarJogo);
+
+  criarBotao(app); //mobile buttons
+
+  setInterval(function (){
+    voltarJogo.empate();
+    cobra.desenhar();
+    maça.empate();
+
+  }, 1500/13);
+
+  //Controles
+  document.addEventListener('keydown', () => {
+    console.log(event.keyCode);
+    cobra.setVel(event.keyCode);
+  });
+
+  //mobile
+  const up = document.getElementById('up');
+  up.addEventListener('click', function(){
+    cobra.setVel(38);
+  });
+
+  const down = document.getElementById('down');
+  down.addEventListener('click', function(){
+    cobra.setVel(40);
+  });
+
+  const left = document.getElementById('left');
+  left.addEventListener('click', function(){
+    cobra.setVel(37);
+  });
+
+  const right = document.getElementById('right');
+  right.addEventListener('click', function(){
+    cobra.setVel(39);
+  });
+
+  const reiniciar = document.getElementById('reiniciar');
+  reiniciar.addEventListener('click', function(){
+    cobra.setVel(32);
+  });
+
+
+}
 </script>
-</body>
-</html>
+</body></html>
