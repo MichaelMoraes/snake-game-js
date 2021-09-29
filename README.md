@@ -1,3 +1,7 @@
+Evoluindo o Snake Game Segue link do Heroku:https://teste-snake.herokuapp.com/
+
+-----------------------------------------
+
 # snake-game-js
 Clássico jogo da cobrinha (bem simples) em JavaScript.
 <img src="sprite-snake.jpg" alt="drawing" width="50"/>
